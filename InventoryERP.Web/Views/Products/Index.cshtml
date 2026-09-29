@@ -1,0 +1,87 @@
+@model IEnumerable<InventoryERP.Web.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+}
+<div class="card card-primary card-outline">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">All Products</h3>
+        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Product</a>
+    </div>
+    <div class="card-body">
+        <form method="get" class="form-row mb-3">
+            <div class="col-md-4">
+                <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name or SKU..." />
+            </div>
+            <div class="col-md-3">
+                <select name="categoryId" class="form-control" asp-items="@(new SelectList((IEnumerable<InventoryERP.Web.Models.Category>)ViewBag.Categories, "Id", "Name", ViewBag.CategoryId))">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="stockFilter" class="form-control">
+                    <option value="">All Stock</option>
+                    <option value="low" selected="@(ViewBag.StockFilter == "low")">Low Stock</option>
+                    <option value="out" selected="@(ViewBag.StockFilter == "out")">Out of Stock</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary btn-block"><i class="fas fa-filter"></i> Filter</button>
+            </div>
+        </form>
+
+        <table class="table table-striped mb-0">
+            <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Cost</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Stock Value</th>
+                <th>Status</th>
+                <th style="width:160px">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var p in Model)
+            {
+                <tr class="@(p.IsLowStock ? "table-warning" : "")">
+                    <td>@p.SKU</td>
+                    <td><a asp-action="Details" asp-route-id="@p.Id">@p.Name</a></td>
+                    <td>@p.Category?.Name</td>
+                    <td>@p.CostPrice.ToString("N2")</td>
+                    <td>@p.SellingPrice.ToString("N2")</td>
+                    <td>@p.Quantity @p.Unit</td>
+                    <td>@p.StockValue.ToString("N2")</td>
+                    <td>
+                        @if (p.Quantity == 0)
+                        {
+                            <span class="badge badge-danger">Out of Stock</span>
+                        }
+                        else if (p.IsLowStock)
+                        {
+                            <span class="badge badge-warning">Low Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-success">In Stock</span>
+                        }
+                        @if (!p.IsActive)
+                        {
+                            <span class="badge badge-secondary">Inactive</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-xs btn-outline-info"><i class="fas fa-eye"></i></a>
+                        <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-xs btn-outline-secondary"><i class="fas fa-edit"></i></a>
+                        <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this product?');">
+                            <button type="submit" class="btn btn-xs btn-outline-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

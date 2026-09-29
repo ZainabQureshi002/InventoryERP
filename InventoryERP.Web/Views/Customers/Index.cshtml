@@ -1,0 +1,40 @@
+@model IEnumerable<InventoryERP.Web.Models.Customer>
+@{
+    ViewData["Title"] = "Customers";
+}
+<div class="card card-primary card-outline">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">All Customers</h3>
+        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Customer</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped mb-0">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th style="width:140px">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.Name</td>
+                    <td>@c.Phone</td>
+                    <td>@c.Email</td>
+                    <td>@c.Address</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-xs btn-outline-secondary"><i class="fas fa-edit"></i></a>
+                        <form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this customer?');">
+                            <button type="submit" class="btn btn-xs btn-outline-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

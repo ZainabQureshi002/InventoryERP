@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "New Role";
+}
+<div class="card card-primary card-outline">
+    <div class="card-header"><h3 class="card-title">New Role</h3></div>
+    <form asp-action="Create" method="post">
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label>Role Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. Cashier, Accountant" required />
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a asp-action="Index" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>

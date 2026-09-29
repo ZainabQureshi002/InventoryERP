@@ -1,0 +1,73 @@
+@model InventoryERP.Web.Models.Product
+@{
+    ViewData["Title"] = "Product Details";
+    var transactions = (List<InventoryERP.Web.Models.StockTransaction>)ViewBag.Transactions;
+}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card card-primary card-outline">
+            <div class="card-body text-center">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="img-fluid mb-3" style="max-height:180px" alt="@Model.Name" />
+                }
+                else
+                {
+                    <i class="fas fa-box fa-5x text-muted mb-3"></i>
+                }
+                <h4>@Model.Name</h4>
+                <p class="text-muted">SKU: @Model.SKU</p>
+                <table class="table table-sm">
+                    <tr><th>Category</th><td>@Model.Category?.Name</td></tr>
+                    <tr><th>Supplier</th><td>@Model.Supplier?.Name</td></tr>
+                    <tr><th>Cost Price</th><td>@Model.CostPrice.ToString("N2")</td></tr>
+                    <tr><th>Selling Price</th><td>@Model.SellingPrice.ToString("N2")</td></tr>
+                    <tr><th>Current Stock</th><td><strong>@Model.Quantity @Model.Unit</strong></td></tr>
+                    <tr><th>Reorder Level</th><td>@Model.ReorderLevel</td></tr>
+                    <tr><th>Stock Value</th><td>@Model.StockValue.ToString("N2")</td></tr>
+                    <tr><th>Status</th><td>@(Model.IsActive ? "Active" : "Inactive")</td></tr>
+                </table>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i> Edit</a>
+                <a asp-action="Index" class="btn btn-default btn-sm">Back to List</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card card-outline card-info">
+            <div class="card-header"><h3 class="card-title">Recent Stock Movements</h3></div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Change</th>
+                        <th>Balance</th>
+                        <th>Reference</th>
+                        <th>By</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var t in transactions)
+                    {
+                        <tr>
+                            <td>@t.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                            <td>@t.Type</td>
+                            <td class="@(t.QuantityChange >= 0 ? "text-success" : "text-danger")">
+                                @(t.QuantityChange >= 0 ? "+" : "")@t.QuantityChange
+                            </td>
+                            <td>@t.BalanceAfter</td>
+                            <td>@t.Reference</td>
+                            <td>@t.CreatedBy</td>
+                        </tr>
+                    }
+                    @if (!transactions.Any())
+                    {
+                        <tr><td colspan="6" class="text-center text-muted">No stock movements yet.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

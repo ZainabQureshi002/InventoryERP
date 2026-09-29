@@ -1,0 +1,51 @@
+@model IEnumerable<InventoryERP.Web.Models.Product>
+@{
+    ViewData["Title"] = "Low Stock Alerts";
+}
+<div class="card card-warning card-outline">
+    <div class="card-header"><h3 class="card-title"><i class="fas fa-triangle-exclamation text-warning"></i> Products at or below reorder level</h3></div>
+    <div class="card-body p-0">
+        <table class="table table-striped mb-0">
+            <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Current Qty</th>
+                <th>Reorder Level</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.SKU</td>
+                    <td>@p.Name</td>
+                    <td>@p.Category?.Name</td>
+                    <td>@p.Quantity @p.Unit</td>
+                    <td>@p.ReorderLevel</td>
+                    <td>
+                        @if (p.Quantity == 0)
+                        {
+                            <span class="badge badge-danger">Out of Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-warning">Low Stock</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-controller="Purchases" asp-action="Create" class="btn btn-xs btn-outline-primary">Reorder</a>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7" class="text-center text-muted">All products are sufficiently stocked.</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

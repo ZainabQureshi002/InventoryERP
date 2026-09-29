@@ -1,0 +1,66 @@
+@using InventoryERP.Web.Authorization
+@{
+    ViewData["Title"] = "Role Permissions";
+    var modules = (Dictionary<string, string[]>)ViewBag.Modules;
+    var assigned = (HashSet<string>)ViewBag.Assigned;
+}
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h3 class="card-title">Permissions for role: <strong>@ViewBag.RoleName</strong></h3>
+    </div>
+    <form asp-action="Permissions" asp-route-id="@ViewBag.RoleId" method="post">
+        <div class="card-body">
+            <p class="text-muted">Tick every action this role is allowed to perform, module by module. "Admin" role always has full access regardless of this screen.</p>
+            <div class="mb-2">
+                <button type="button" class="btn btn-xs btn-outline-primary" id="selectAllBtn">Select All</button>
+                <button type="button" class="btn btn-xs btn-outline-secondary" id="clearAllBtn">Clear All</button>
+            </div>
+            <div class="row">
+                @foreach (var module in modules)
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card card-outline card-secondary h-100">
+                            <div class="card-header py-2">
+                                <h6 class="card-title mb-0">
+                                    @module.Key
+                                    <input type="checkbox" class="module-toggle float-right" data-module="@module.Key" title="Toggle all in this module" />
+                                </h6>
+                            </div>
+                            <div class="card-body py-2">
+                                @foreach (var action in module.Value)
+                                {
+                                    var code = Permissions.Code(module.Key, action);
+                                    var isChecked = assigned.Contains(code);
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input perm-checkbox module-@module.Key" name="selectedPermissions" value="@code" id="perm_@code" checked="@isChecked" />
+                                        <label class="form-check-label" for="perm_@code">@action</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Save Permissions</button>
+            <a asp-action="Index" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    document.getElementById('selectAllBtn').addEventListener('click', () => {
+        document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = true);
+    });
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+        document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = false);
+    });
+    document.querySelectorAll('.module-toggle').forEach(toggle => {
+        toggle.addEventListener('change', () => {
+            document.querySelectorAll('.module-' + toggle.dataset.module).forEach(cb => cb.checked = toggle.checked);
+        });
+    });
+</script>
+}

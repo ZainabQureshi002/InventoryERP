@@ -1,0 +1,42 @@
+@model List<(string Id, string Name, int PermissionCount)>
+@{
+    ViewData["Title"] = "Roles";
+}
+<div class="card card-primary card-outline">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">All Roles</h3>
+        @if (User.IsInRole("Admin") || User.HasClaim("Permission", "Roles.Create"))
+        {
+            <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Role</a>
+        }
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped mb-0">
+            <thead>
+            <tr>
+                <th>Role</th>
+                <th>Permissions Assigned</th>
+                <th style="width:220px">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Name</td>
+                    <td><span class="badge badge-info">@r.PermissionCount</span></td>
+                    <td>
+                        <a asp-action="Permissions" asp-route-id="@r.Id" class="btn btn-xs btn-outline-secondary"><i class="fas fa-key"></i> Permissions</a>
+                        @if (!new[] { "Admin", "Manager", "Staff" }.Contains(r.Name))
+                        {
+                            <form asp-action="Delete" asp-route-id="@r.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this role?');">
+                                <button type="submit" class="btn btn-xs btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

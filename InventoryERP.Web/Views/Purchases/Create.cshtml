@@ -1,0 +1,119 @@
+@model InventoryERP.Web.Models.ViewModels.PurchaseFormViewModel
+@{
+    ViewData["Title"] = "New Purchase";
+}
+<div class="card card-primary card-outline">
+    <div class="card-header"><h3 class="card-title">New Purchase (Stock In)</h3></div>
+    <form asp-action="Create" method="post" id="purchaseForm">
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-row">
+                <div class="form-group col-md-3">
+                    <label>Invoice No</label>
+                    <input name="InvoiceNo" value="@Model.InvoiceNo" class="form-control" />
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Supplier</label>
+                    <select name="SupplierId" asp-items="ViewBag.Suppliers" class="form-control" required>
+                        <option value="">-- Select Supplier --</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Purchase Date</label>
+                    <input type="datetime-local" name="PurchaseDate" value="@Model.PurchaseDate.ToString("yyyy-MM-ddTHH:mm")" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea name="Notes" class="form-control" rows="2"></textarea>
+            </div>
+
+            <hr />
+            <h5>Line Items</h5>
+            <table class="table table-bordered" id="itemsTable">
+                <thead class="thead-light">
+                <tr>
+                    <th style="width:35%">Product</th>
+                    <th style="width:15%">Qty</th>
+                    <th style="width:20%">Unit Cost</th>
+                    <th style="width:20%">Subtotal</th>
+                    <th style="width:10%"></th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="addRowBtn"><i class="fas fa-plus"></i> Add Item</button>
+
+            <div class="text-right mt-3">
+                <h4>Total: <span id="grandTotal">0.00</span></h4>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Save Purchase</button>
+            <a asp-action="Index" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    const products = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.Products));
+    let rowIndex = 0;
+
+    function productOptions(selectedId) {
+        let html = '<option value="">-- Select Product --</option>';
+        products.forEach(p => {
+            const sel = (selectedId && selectedId == p.Id) ? 'selected' : '';
+            html += `<option value="${p.Id}" data-cost="${p.CostPrice}" ${sel}>${p.Name} (${p.SKU})</option>`;
+        });
+        return html;
+    }
+
+    function addRow() {
+        const idx = rowIndex++;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <select class="form-control product-select" name="Items[${idx}].ProductId">${productOptions()}</select>
+            </td>
+            <td><input type="number" min="1" value="1" class="form-control qty-input" name="Items[${idx}].Quantity" /></td>
+            <td><input type="number" min="0" step="0.01" value="0" class="form-control cost-input" name="Items[${idx}].UnitCost" /></td>
+            <td class="subtotal-cell text-right">0.00</td>
+            <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger remove-row"><i class="fas fa-times"></i></button></td>
+        `;
+        document.querySelector('#itemsTable tbody').appendChild(tr);
+        bindRow(tr);
+    }
+
+    function bindRow(tr) {
+        const select = tr.querySelector('.product-select');
+        const qty = tr.querySelector('.qty-input');
+        const cost = tr.querySelector('.cost-input');
+        const subtotalCell = tr.querySelector('.subtotal-cell');
+
+        function updateCostFromProduct() {
+            const opt = select.options[select.selectedIndex];
+            if (opt && opt.dataset.cost) cost.value = opt.dataset.cost;
+            updateSubtotal();
+        }
+        function updateSubtotal() {
+            const s = (parseFloat(qty.value) || 0) * (parseFloat(cost.value) || 0);
+            subtotalCell.textContent = s.toFixed(2);
+            updateGrandTotal();
+        }
+        select.addEventListener('change', updateCostFromProduct);
+        qty.addEventListener('input', updateSubtotal);
+        cost.addEventListener('input', updateSubtotal);
+        tr.querySelector('.remove-row').addEventListener('click', () => { tr.remove(); updateGrandTotal(); });
+    }
+
+    function updateGrandTotal() {
+        let total = 0;
+        document.querySelectorAll('.subtotal-cell').forEach(c => total += parseFloat(c.textContent) || 0);
+        document.getElementById('grandTotal').textContent = total.toFixed(2);
+    }
+
+    document.getElementById('addRowBtn').addEventListener('click', addRow);
+    addRow();
+</script>
+}

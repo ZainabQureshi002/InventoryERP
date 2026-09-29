@@ -1,0 +1,47 @@
+@model IEnumerable<InventoryERP.Web.Models.StockTransaction>
+@{
+    ViewData["Title"] = "Stock Ledger";
+}
+<div class="card card-primary card-outline">
+    <div class="card-header"><h3 class="card-title">Stock Ledger (last 300 movements)</h3></div>
+    <div class="card-body">
+        <form method="get" class="form-row mb-3">
+            <div class="col-md-4">
+                <select name="productId" class="form-control" asp-items="ViewBag.Products" onchange="this.form.submit()">
+                    <option value="">All Products</option>
+                </select>
+            </div>
+        </form>
+        <table class="table table-striped mb-0">
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Product</th>
+                <th>Type</th>
+                <th>Change</th>
+                <th>Balance</th>
+                <th>Reference</th>
+                <th>Notes</th>
+                <th>By</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td>@t.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                    <td>@t.Product?.Name</td>
+                    <td>@t.Type</td>
+                    <td class="@(t.QuantityChange >= 0 ? "text-success" : "text-danger")">
+                        @(t.QuantityChange >= 0 ? "+" : "")@t.QuantityChange
+                    </td>
+                    <td>@t.BalanceAfter</td>
+                    <td>@t.Reference</td>
+                    <td>@t.Notes</td>
+                    <td>@t.CreatedBy</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Stock Adjustment";
+}
+<div class="card card-primary card-outline">
+    <div class="card-header"><h3 class="card-title">Manual Stock Adjustment</h3></div>
+    <form asp-action="Adjust" method="post">
+        <div class="card-body">
+            <div class="form-group">
+                <label>Product</label>
+                <select name="productId" class="form-control" asp-items="ViewBag.Products" required>
+                    <option value="">-- Select Product --</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label>Adjustment Type</label>
+                    <select name="adjustmentType" class="form-control">
+                        <option value="add">Add Stock (+)</option>
+                        <option value="remove">Remove Stock (-)</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity" min="1" class="form-control" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Reason</label>
+                <textarea name="reason" class="form-control" rows="2" placeholder="e.g. Damaged goods, stock count correction, returned item..."></textarea>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Apply Adjustment</button>
+        </div>
+    </form>
+</div>

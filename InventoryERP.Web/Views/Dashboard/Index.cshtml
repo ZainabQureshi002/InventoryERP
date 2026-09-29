@@ -1,0 +1,203 @@
+@model InventoryERP.Web.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>@Model.TotalProducts</h3>
+                <p>Total Active Products</p>
+            </div>
+            <div class="icon"><i class="fas fa-box"></i></div>
+            <a asp-controller="Products" asp-action="Index" class="small-box-footer">View products <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>@Model.TotalStockValue.ToString("N0")</h3>
+                <p>Total Stock Value (cost)</p>
+            </div>
+            <div class="icon"><i class="fas fa-sack-dollar"></i></div>
+            <a asp-controller="Reports" asp-action="Index" class="small-box-footer">View reports <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>@Model.LowStockCount</h3>
+                <p>Low Stock Products</p>
+            </div>
+            <div class="icon"><i class="fas fa-triangle-exclamation"></i></div>
+            <a asp-controller="Stock" asp-action="LowStock" class="small-box-footer">View alerts <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>@Model.OutOfStockCount</h3>
+                <p>Out of Stock</p>
+            </div>
+            <div class="icon"><i class="fas fa-ban"></i></div>
+            <a asp-controller="Products" asp-action="Index" asp-route-stockFilter="out" class="small-box-footer">View products <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-primary"><i class="fas fa-cash-register"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Sales Today</span>
+                <span class="info-box-number">@Model.SalesToday.ToString("N2")</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-teal"><i class="fas fa-calendar"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Sales This Month</span>
+                <span class="info-box-number">@Model.SalesThisMonth.ToString("N2")</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-secondary"><i class="fas fa-truck-ramp-box"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Purchases This Month</span>
+                <span class="info-box-number">@Model.PurchasesThisMonth.ToString("N2")</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-purple"><i class="fas fa-users"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Suppliers / Customers</span>
+                <span class="info-box-number">@Model.TotalSuppliers / @Model.TotalCustomers</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card card-outline card-primary">
+            <div class="card-header"><h3 class="card-title">Sales vs Purchases (last 14 days)</h3></div>
+            <div class="card-body"><canvas id="trendChart" style="min-height:280px"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-outline card-info">
+            <div class="card-header"><h3 class="card-title">Stock by Category</h3></div>
+            <div class="card-body"><canvas id="categoryChart" style="min-height:280px"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card card-outline card-success">
+            <div class="card-header"><h3 class="card-title">Top Selling Products</h3></div>
+            <div class="card-body"><canvas id="topProductsChart" style="min-height:260px"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card card-outline card-warning">
+            <div class="card-header"><h3 class="card-title">Low Stock Products</h3></div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead><tr><th>Product</th><th>Qty</th><th>Reorder Level</th></tr></thead>
+                    <tbody>
+                    @foreach (var p in Model.LowStockProducts)
+                    {
+                        <tr>
+                            <td><a asp-controller="Products" asp-action="Details" asp-route-id="@p.Id">@p.Name</a></td>
+                            <td>@p.Quantity</td>
+                            <td>@p.ReorderLevel</td>
+                        </tr>
+                    }
+                    @if (!Model.LowStockProducts.Any())
+                    {
+                        <tr><td colspan="3" class="text-center text-muted">No low stock products.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-outline card-secondary">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title">Recent Sales</h3>
+                <a asp-controller="Sales" asp-action="Index" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Total</th></tr></thead>
+                    <tbody>
+                    @foreach (var s in Model.RecentSales)
+                    {
+                        <tr>
+                            <td><a asp-controller="Sales" asp-action="Details" asp-route-id="@s.Id">@s.InvoiceNo</a></td>
+                            <td>@s.Customer?.Name</td>
+                            <td>@s.SaleDate.ToString("dd MMM yyyy")</td>
+                            <td>@s.TotalAmount.ToString("N2")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const trendLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TrendLabels));
+    const salesTrend = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SalesTrend));
+    const purchaseTrend = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PurchaseTrend));
+    const categoryNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryNames));
+    const categoryStock = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryStockCounts));
+    const topProductNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopProductNames));
+    const topProductQuantities = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopProductQuantities));
+
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: trendLabels,
+            datasets: [
+                { label: 'Sales', data: salesTrend, borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,0.1)', tension: 0.3 },
+                { label: 'Purchases', data: purchaseTrend, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.1)', tension: 0.3 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: categoryNames,
+            datasets: [{ data: categoryStock, backgroundColor: ['#007bff','#28a745','#ffc107','#17a2b8','#6f42c1','#fd7e14'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    new Chart(document.getElementById('topProductsChart'), {
+        type: 'bar',
+        data: {
+            labels: topProductNames,
+            datasets: [{ label: 'Units Sold', data: topProductQuantities, backgroundColor: '#17a2b8' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+    });
+</script>
+}

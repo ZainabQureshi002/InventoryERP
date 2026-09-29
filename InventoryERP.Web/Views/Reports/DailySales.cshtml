@@ -1,0 +1,83 @@
+@model List<InventoryERP.Web.Models.SalesOrder>
+@{
+    ViewData["Title"] = "Daily Sales Report";
+}
+<div class="card card-primary card-outline">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Daily Sales &mdash; @DateTime.Parse((string)ViewBag.Date).ToString("dd MMMM yyyy")</h3>
+        <form method="get" class="form-inline">
+            <a class="btn btn-sm btn-outline-secondary mr-2" asp-action="DailySales" asp-route-date="@ViewBag.PrevDate"><i class="fas fa-chevron-left"></i> Previous Day</a>
+            <input type="date" name="date" value="@ViewBag.Date" class="form-control form-control-sm mr-2" onchange="this.form.submit()" />
+            <a class="btn btn-sm btn-outline-secondary" asp-action="DailySales" asp-route-date="@ViewBag.NextDate"><i class="fas fa-chevron-right"></i> Next Day</a>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="small-box bg-success">
+                    <div class="inner"><h3>@(((decimal)ViewBag.TotalRevenue).ToString("N2"))</h3><p>Total Sales Revenue</p></div>
+                    <div class="icon"><i class="fas fa-sack-dollar"></i></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="small-box bg-info">
+                    <div class="inner"><h3>@ViewBag.TotalInvoices</h3><p>Invoices (Bills)</p></div>
+                    <div class="icon"><i class="fas fa-receipt"></i></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="small-box bg-warning">
+                    <div class="inner"><h3>@ViewBag.TotalItemsSold</h3><p>Total Units Sold</p></div>
+                    <div class="icon"><i class="fas fa-boxes-stacked"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <h5>Products Sold Today</h5>
+        <table class="table table-bordered table-striped mb-4">
+            <thead class="thead-light">
+            <tr><th>Product</th><th>Quantity Sold</th><th>Revenue</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var r in ViewBag.ByProduct)
+            {
+                <tr><td>@r.Product</td><td>@r.Qty</td><td>@r.Revenue.ToString("N2")</td></tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="3" class="text-center text-muted">No sales recorded for this day.</td></tr>
+            }
+            </tbody>
+        </table>
+
+        <h5>Invoice Details</h5>
+        @foreach (var order in Model)
+        {
+            <div class="card card-outline card-secondary mb-2">
+                <div class="card-header py-2">
+                    <strong>@order.InvoiceNo</strong> &mdash; @order.Customer?.Name
+                    <span class="float-right">@order.SaleDate.ToString("hh:mm tt")</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
+                        <tbody>
+                        @foreach (var item in order.Items)
+                        {
+                            <tr>
+                                <td>@item.Product?.Name</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.UnitPrice.ToString("N2")</td>
+                                <td>@item.Subtotal.ToString("N2")</td>
+                            </tr>
+                        }
+                        </tbody>
+                        <tfoot>
+                        <tr><th colspan="3" class="text-right">Invoice Total</th><th>@order.TotalAmount.ToString("N2")</th></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>

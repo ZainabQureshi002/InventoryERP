@@ -1,0 +1,93 @@
+@{
+    ViewData["Title"] = "Reports";
+}
+<div class="mb-3">
+    <a asp-action="DailySales" class="btn btn-primary"><i class="fas fa-calendar-day"></i> Daily Sales Report</a>
+</div>
+<div class="card card-primary card-outline">
+    <div class="card-header"><h3 class="card-title">Filter</h3></div>
+    <div class="card-body">
+        <form method="get" class="form-row align-items-end">
+            <div class="col-md-3">
+                <label>From</label>
+                <input type="date" name="from" value="@ViewBag.From" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label>To</label>
+                <input type="date" name="to" value="@ViewBag.To" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-block">Apply</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="small-box bg-success">
+            <div class="inner"><h3>@(((decimal)ViewBag.TotalRevenue).ToString("N2"))</h3><p>Total Sales Revenue (period)</p></div>
+            <div class="icon"><i class="fas fa-chart-line"></i></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="small-box bg-secondary">
+            <div class="inner"><h3>@(((decimal)ViewBag.TotalSpend).ToString("N2"))</h3><p>Total Purchase Spend (period)</p></div>
+            <div class="icon"><i class="fas fa-truck-ramp-box"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-outline card-success">
+            <div class="card-header"><h3 class="card-title">Sales by Product</h3></div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead><tr><th>Product</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+                    <tbody>
+                    @foreach (var r in ViewBag.SalesByProduct)
+                    {
+                        <tr><td>@r.Product</td><td>@r.QtySold</td><td>@r.Revenue.ToString("N2")</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-outline card-secondary">
+            <div class="card-header"><h3 class="card-title">Purchases by Supplier</h3></div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead><tr><th>Supplier</th><th>Orders</th><th>Amount</th></tr></thead>
+                    <tbody>
+                    @foreach (var r in ViewBag.PurchaseBySupplier)
+                    {
+                        <tr><td>@r.Supplier</td><td>@r.Orders</td><td>@r.Amount.ToString("N2")</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-outline card-info">
+            <div class="card-header"><h3 class="card-title">Stock Valuation (all active products) &mdash; Total: @(((decimal)ViewBag.TotalStockValue).ToString("N2"))</h3></div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead><tr><th>SKU</th><th>Product</th><th>Category</th><th>Qty</th><th>Cost Price</th><th>Value</th></tr></thead>
+                    <tbody>
+                    @foreach (var r in ViewBag.StockValuation)
+                    {
+                        <tr><td>@r.SKU</td><td>@r.Name</td><td>@r.Category</td><td>@r.Quantity</td><td>@r.CostPrice.ToString("N2")</td><td>@r.Value.ToString("N2")</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
